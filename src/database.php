@@ -1,5 +1,5 @@
 <?php
-require_once('../../config/db_config.php');
+require_once('../cfg/db_config.php');
 
 class Database
 {
@@ -13,7 +13,7 @@ class Database
     public function voerQueryUit($query)
     {
         // Check if the query is a SELECT query
-        if(str_contains($query, 'SELECT')){
+        if(strpos($query, 'SELECT') !== false){
             // Query is a SELECT, fetch the results
             $result = $this->connectie->query($query);
             $rows = $result->fetchAll(PDO::FETCH_ASSOC);
