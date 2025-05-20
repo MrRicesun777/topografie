@@ -8,30 +8,38 @@ $error = '';
 // Check if form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $student = new Student();
-    
+
     // Get form data
-    $username = isset($_POST['username']) ? $_POST['username'] : '';
-    $email = isset($_POST['email']) ? $_POST['email'] : '';
+    $username = isset($_POST['username']) ? trim($_POST['username']) : '';
+    $email = isset($_POST['email']) ? trim($_POST['email']) : '';
     $password = isset($_POST['password']) ? $_POST['password'] : '';
     $confirmPassword = isset($_POST['confirm_password']) ? $_POST['confirm_password'] : '';
-    
+    $type = isset($_POST['type']) ? $_POST['type'] : '';
+
     // Basic validation
     if ($password !== $confirmPassword) {
-        $error = "Passwords do not match";
+        $error = "Wachtwoorden komen niet overeen";
+    } else if (empty($username) || empty($email) || empty($password) || empty($type)) {
+        if (empty($type)) {
+            $error = "Selecteer een type (leerling of docent).";
+        } else {
+            $error = "Alle velden zijn verplicht";
+        }
     } else {
         // Set student properties
         $student->setUsername($username);
         $student->setEmail($email);
         $student->setPassword($password);
-        
+        $student->setType($type);
+
         // Attempt to save student
         if ($student->saveStudent()) {
             // Registration successful
             $_SESSION['registration_success'] = true;
-            header("Location: inlog.php");
+            header("Location: index.php");
             exit();
         } else {
-            $error = "Registration failed. Please try again.";
+            $error = "Registratie mislukt. Probeer het opnieuw.";
         }
     }
 }
@@ -40,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Student Registration</title>
+    <title>Student Registratie</title>
     <style>
         .register-container {
             width: 300px;
@@ -60,9 +68,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             display: block;
             margin-bottom: 5px;
         }
-        input[type="text"], input[type="email"], input[type="password"] {
+        input[type="text"], input[type="email"], input[type="password"], select {
             width: 100%;
             padding: 8px;
+            box-sizing: border-box;
             border: 1px solid #ddd;
             border-radius: 4px;
         }
@@ -73,6 +82,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            width: 100%;
         }
         input[type="submit"]:hover {
             background-color: #45a049;
@@ -85,37 +95,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 <body>
     <div class="register-container">
-        <h2>Student Registration</h2>
+        <h2>Student Registratie</h2>
         <?php if ($error): ?>
-            <div class="error"><?php echo $error; ?></div>
+            <div class="error"><?php echo htmlspecialchars($error); ?></div>
         <?php endif; ?>
-        
+
         <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
             <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
+                <label for="username">Gebruikersnaam:</label>
+                <input type="text" id="username" name="username" value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>" required>
             </div>
-            
+
             <div class="form-group">
                 <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
+                <input type="email" id="email" name="email" value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>" required>
             </div>
-            
+
             <div class="form-group">
-                <label for="password">Password:</label>
+                <label for="password">Wachtwoord:</label>
                 <input type="password" id="password" name="password" required>
             </div>
-            
+
             <div class="form-group">
-                <label for="confirm_password">Confirm Password:</label>
+                <label for="confirm_password">Bevestig Wachtwoord:</label>
                 <input type="password" id="confirm_password" name="confirm_password" required>
             </div>
-            
-            <input type="submit" value="Register">
+
+            <div class="form-group">
+                <label for="type">Type:</label>
+                <select id="type" name="type" required>
+                    <option value="">-- Selecteer Type --</option>
+                    <option value="leerling" <?php echo (isset($_POST['type']) && $_POST['type'] === 'leerling') ? 'selected' : ''; ?>>Leerling</option>
+                    <option value="docent" <?php echo (isset($_POST['type']) && $_POST['type'] === 'docent') ? 'selected' : ''; ?>>Docent</option>
+                </select>
+            </div>
+
+            <input type="submit" value="Registreer">
         </form>
-        
+
         <div class="login-link">
-            Already have an account? <a href="inlog.php">Login here</a>
+            Heb je al een account? <a href="inlog.php">Log hier in</a>
         </div>
     </div>
 </body>
