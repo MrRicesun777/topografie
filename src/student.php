@@ -7,6 +7,8 @@ class Student extends Database
     private $username;
     private $email;
     private $password;
+    private $type;
+    private $klassecode;
 
     // Get all students
     public function getAllStudents()
@@ -34,9 +36,12 @@ class Student extends Database
         $email = $this->getEmail();
         // Hash the password before saving to database
         $hashedPassword = password_hash($this->getPassword(), PASSWORD_DEFAULT);
+        $type = $this->type;
+        $klassecode = $this->klassecode;
 
-        $query = "INSERT INTO Students (username, email, password) 
-                  VALUES ('$username', '$email', '$hashedPassword')";
+        $query = "INSERT INTO Students (username, email, password, type, klassecode) 
+                  VALUES ('$username', '$email', '$hashedPassword', '$type', " . 
+                  ($klassecode ? "'$klassecode'" : "NULL") . ")";
         
         // Return true if the query is successful, else return false
         return parent::voerQueryUit($query);
@@ -128,6 +133,36 @@ class Student extends Database
     public function setPassword($password)
     {
         $this->password = $password;
+    }
+
+    public function setType($type)
+    {
+        $this->type = $type;
+    }
+
+    public function setKlassecode($klassecode)
+    {
+        $this->klassecode = $klassecode;
+    }
+
+    public function getKlassecode($id)
+    {
+        $query = "SELECT klassecode FROM Students WHERE id = $id";
+        $result = parent::voerQueryUit($query);
+        return $result && count($result) > 0 ? $result[0]['klassecode'] : null;
+    }
+
+    public function updateKlassecode($id, $klassecode)
+    {
+        $query = "UPDATE Students SET klassecode = '$klassecode' WHERE id = $id";
+        return parent::voerQueryUit($query);
+    }
+
+    public function verifyKlassecode($klassecode)
+    {
+        $query = "SELECT id FROM Students WHERE klassecode = '$klassecode' AND type = 'docent'";
+        $result = parent::voerQueryUit($query);
+        return $result && count($result) > 0;
     }
 }
 ?>
