@@ -10,18 +10,14 @@ class Database
         $this->connectie = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
     }
 
-    public function voerQueryUit($query)
+    public function voerQueryUit($query, $params = [])
     {
-        // Check if the query is a SELECT query
-        if(strpos($query, 'SELECT') !== false){
-            // Query is a SELECT, fetch the results
-            $result = $this->connectie->query($query);
-            $rows = $result->fetchAll(PDO::FETCH_ASSOC);
-            return $rows;
-        }else{
-            // Query is not a SELECT, execute the query
-            $result = $this->connectie->exec($query);
-            return $result;
+        $stmt = $this->connectie->prepare($query);
+        $stmt->execute($params);
+        if (stripos($query, 'SELECT') === 0) {
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } else {
+            return $stmt->rowCount();
         }
     }
 
