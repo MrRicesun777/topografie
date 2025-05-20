@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $studentId = $_SESSION['student_id'];
 $results = $quizResults->getStudentResults($studentId);
 $stats = $quizResults->getStudentStats($studentId);
-$studentInfo = $student->getStudentById($studentId);
+$studentInfo = $student->getStudent($studentId)[0];
 ?>
 
 <!DOCTYPE html>
