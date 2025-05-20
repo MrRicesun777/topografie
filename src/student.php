@@ -164,5 +164,11 @@ class Student extends Database
         $result = parent::voerQueryUit($query);
         return $result && count($result) > 0;
     }
+
+    public function getStudentsByKlassecode($klassecode)
+    {
+        $query = "SELECT id, username, email FROM Students WHERE klassecode = '$klassecode' AND type = 'leerling'";
+        return parent::voerQueryUit($query);
+    }
 }
 ?>
