@@ -129,5 +129,13 @@ class Student extends Database
     {
         $this->password = $password;
     }
+
+    public function getStudentById($id)
+    {
+        $query = "SELECT * FROM students WHERE id = :id";
+        $params = [':id' => $id];
+        $result = parent::voerQueryUit($query, $params);
+        return $result ? $result[0] : null;
+    }
 }
 ?>

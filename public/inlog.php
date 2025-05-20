@@ -18,7 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     if ($result) {
         // Login successful
-        $_SESSION['user_id'] = $result['id'];
+        $_SESSION['student_id'] = $result['id'];
         $_SESSION['username'] = $result['username'];
         
         // Redirect to dashboard or home page
