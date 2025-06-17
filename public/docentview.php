@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once('../src/student.php');
+require_once('../src/quiz_results.php');
 
 // Check if user is logged in and is a docent
 if (!isset($_SESSION['user_id']) || $_SESSION['type'] !== 'docent') {
@@ -9,8 +10,16 @@ if (!isset($_SESSION['user_id']) || $_SESSION['type'] !== 'docent') {
 }
 
 $student = new Student();
+$quizResults = new QuizResults();
 $klassecode = $student->getKlassecode($_SESSION['user_id']);
 $students = $klassecode ? $student->getStudentsByKlassecode($klassecode) : [];
+
+// Get scores for each student
+$studentScores = [];
+foreach ($students as $student) {
+    $scores = $quizResults->getStudentStats($student['id']);
+    $studentScores[$student['id']] = $scores;
+}
 
 // Handle klassecode creation
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['create_klassecode'])) {
@@ -85,19 +94,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['create_klassecode'])) 
             margin-top: 15px;
         }
         .student-item {
-            padding: 10px;
+            padding: 15px;
             background-color: white;
             border-radius: 4px;
             margin-bottom: 10px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .student-info {
+            flex: 1;
         }
         .student-name {
             font-weight: bold;
             color: #2c3e50;
+            font-size: 1.1em;
         }
         .student-email {
             color: #666;
             font-size: 0.9em;
+        }
+        .student-scores {
+            text-align: right;
+            margin-left: 20px;
+        }
+        .score-item {
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+        .correct-score {
+            color: #28a745;
+        }
+        .incorrect-score {
+            color: #dc3545;
         }
         .no-students {
             color: #666;
@@ -130,8 +160,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['create_klassecode'])) 
                 <?php if (count($students) > 0): ?>
                     <?php foreach ($students as $student): ?>
                         <div class="student-item">
-                            <div class="student-name"><?php echo htmlspecialchars($student['username']); ?></div>
-                            <div class="student-email"><?php echo htmlspecialchars($student['email']); ?></div>
+                            <div class="student-info">
+                                <div class="student-name"><?php echo htmlspecialchars($student['username']); ?></div>
+                                <div class="student-email"><?php echo htmlspecialchars($student['email']); ?></div>
+                            </div>
+                            <div class="student-scores">
+                                <?php 
+                                $scores = isset($studentScores[$student['id']]) ? $studentScores[$student['id']] : array();
+                                foreach ($scores as $score): 
+                                    $correctCount = isset($score['correct_count']) ? $score['correct_count'] : 0;
+                                    $wrongCount = isset($score['wrong_count']) ? $score['wrong_count'] : 0;
+                                ?>
+                                    <div class="score-item">
+                                        <span class="correct-score">Correct: <?php echo $correctCount; ?></span>
+                                        <span class="incorrect-score">Incorrect: <?php echo $wrongCount; ?></span>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>
