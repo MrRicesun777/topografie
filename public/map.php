@@ -48,26 +48,133 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_klassecode'])) 
     }
 
     body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
+      font-family: 'Open Sans', sans-serif;
+      background: #f5f7fa;
+      color: #333;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header-actions {
+      display: flex;
+      justify-content: flex-end;
+      padding: 10px 0;
+    }
+
+    .logout {
+      background-color: #ff4d4f;
+      color: #fff;
+      padding: 8px 16px;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: background-color 0.3s ease;
+    }
+
+    .logout:hover {
+      background-color: #d9363e;
+    }
+
+    .klassecode-section {
+      background-color: #ffffff;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
       text-align: center;
     }
 
+    .klassecode-section h3 {
+      margin-bottom: 15px;
+      color: #2c3e50;
+    }
+
+    .klassecode-form {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .klassecode-input {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+      width: 250px;
+      transition: border-color 0.3s ease;
+    }
+
+    .klassecode-input:focus {
+      border-color: #3498db;
+      outline: none;
+    }
+
+    .submit-button {
+      padding: 10px 18px;
+      background-color: #3498db;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .submit-button:hover {
+      background-color: #2980b9;
+    }
+
+    .error-message,
+    .success-message {
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .error-message {
+      background-color: #ffe0e0;
+      color: #d8000c;
+    }
+
+    .success-message {
+      background-color: #e0ffe6;
+      color: #008000;
+    }
+
     #question {
-      font-size: 24px;
-      margin: 15px;
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 10px;
     }
 
     #score {
-      margin-bottom: 10px;
       font-size: 18px;
-      font-weight: bold;
+      margin-bottom: 15px;
+      color: #555;
     }
 
     #map {
-      height: 90vh;
+      height: 75vh;
       width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (max-width: 600px) {
+      .klassecode-form {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .klassecode-input {
+        width: 100%;
+      }
     }
   </style>
 </head>
