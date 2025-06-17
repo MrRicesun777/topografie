@@ -51,6 +51,8 @@ class QuizResults {
         $query = "SELECT 
                     mode,
                     COUNT(*) as total_attempts,
+                    SUM(score) as correct_count,
+                    SUM(total_possible_score - score) as wrong_count,
                     AVG(score) as average_score,
                     MAX(score) as highest_score
                  FROM quiz_results 

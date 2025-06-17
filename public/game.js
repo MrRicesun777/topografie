@@ -1,51 +1,77 @@
-const map = L.map('map').setView([54, 15], 4);
+const map = L.map("map").setView([54, 15], 4);
 
 // Voeg een kaartlaag toe zonder labels (grijs zonder namen)
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; OpenStreetMap contributors',
-}).addTo(map);
+L.tileLayer(
+  "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png",
+  {
+    attribution: "&copy; OpenStreetMap contributors",
+  }
+).addTo(map);
 
 let score = 0;
 let wrongScore = 0;
 let remainingCountries = [];
 let currentCountry = null;
+let correctCountries = [];
+let wrongCountries = [];
 
-document.getElementById('score').innerText = `Score: ${score} goed | ${wrongScore} fout`;
+document.getElementById(
+  "score"
+).innerText = `Score: ${score} goed | ${wrongScore} fout`;
 
 // Laad GeoJSON met landen in Europa
-fetch('https://raw.githubusercontent.com/leakyMirror/map-of-europe/master/GeoJSON/europe.geojson')
-  .then(res => res.json())
-  .then(data => {
+fetch(
+  "https://raw.githubusercontent.com/leakyMirror/map-of-europe/master/GeoJSON/europe.geojson"
+)
+  .then((res) => res.json())
+  .then((data) => {
     const countriesLayer = L.geoJSON(data, {
       style: {
         color: "#000",
         weight: 1,
         fillColor: "#3b729f",
-        fillOpacity: 0.6
+        fillOpacity: 0.6,
       },
       onEachFeature: function (feature, layer) {
         const name = feature.properties.NAME;
 
         // Alleen landen in Europa (exclusief deze uitzonderingen)
-        const excluded = ["San Marino", "Israel", "Andorra", "Holy See (Vatican City)", "Faroe Islands", "Monaco", "Azerbaijan", "Armenia", "Georgia"];
+        const excluded = [
+          "San Marino",
+          "Israel",
+          "Andorra",
+          "Holy See (Vatican City)",
+          "Faroe Islands",
+          "Monaco",
+          "Azerbaijan",
+          "Armenia",
+          "Georgia",
+        ];
         if (excluded.includes(name)) return;
 
-        layer.on('click', function () {
+        layer.on("click", function () {
           if (!currentCountry) return;
 
           if (name === currentCountry) {
             layer.setStyle({ fillColor: "#28a745" }); // groen
             score++;
+            correctCountries.push(name);
           } else {
             layer.setStyle({ fillColor: "#dc3545" }); // rood
             wrongScore++;
+            wrongCountries.push(name);
           }
 
+          // Save score instantly
+          saveScore(name, name === currentCountry);
+
           // Verwijder land uit de lijst zodat het niet opnieuw gevraagd wordt
-          remainingCountries = remainingCountries.filter(c => c !== name);
+          remainingCountries = remainingCountries.filter((c) => c !== name);
 
           // Update score
-          document.getElementById('score').innerText = `Score: ${score} goed | ${wrongScore} fout`;
+          document.getElementById(
+            "score"
+          ).innerText = `Score: ${score} goed | ${wrongScore} fout`;
 
           // Volgende vraag
           setTimeout(() => {
@@ -55,7 +81,7 @@ fetch('https://raw.githubusercontent.com/leakyMirror/map-of-europe/master/GeoJSO
 
         // Voeg toe aan lijst
         remainingCountries.push(name);
-      }
+      },
     });
 
     countriesLayer.addTo(map);
@@ -64,11 +90,35 @@ fetch('https://raw.githubusercontent.com/leakyMirror/map-of-europe/master/GeoJSO
 
 function askQuestion() {
   if (remainingCountries.length === 0) {
-    document.getElementById('question').innerText = 'Het spel is afgelopen!';
+    document.getElementById("question").innerText = "Het spel is afgelopen!";
     return;
   }
 
   const randomIndex = Math.floor(Math.random() * remainingCountries.length);
   currentCountry = remainingCountries[randomIndex];
-  document.getElementById('question').innerText = `Klik op: ${currentCountry}`;
+  document.getElementById("question").innerText = `Klik op: ${currentCountry}`;
+}
+
+function saveScore(country, isCorrect) {
+  fetch("save_score.php", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      score: isCorrect ? 1 : 0,
+      total_possible_score: 1,
+      correct_countries: isCorrect ? [country] : [],
+      wrong_countries: isCorrect ? [] : [country],
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (!data.success) {
+        console.error("Failed to save score:", data.error);
+      }
+    })
+    .catch((error) => {
+      console.error("Error saving score:", error);
+    });
 }
